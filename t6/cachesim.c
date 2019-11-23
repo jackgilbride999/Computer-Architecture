@@ -34,15 +34,38 @@ int getOffset(char * address){
     return address[0]-'0';
 }
 
-int getSet(char * address, int N){
-    // return the set number, which is log2(N)
+int getNumSetBits(char * address, int N){
+    // return the number of bits which hold the set number, which is log2(N)
+    switch(N){
+        case 8:
+            return 3;
+        case 4:
+            return 2;
+        case 2:
+            return 1;
+        case 1:
+            return 0;
+    }
 }
 
-int getTag(char * address, int N){
+int getNumTagBits(char * address, int N){
+    // return the number of bits which hold the tag number
+    return 16 - 4 - getNumSetBits(N); 
+}
 
+int getSetNumber(char * address, int numSetBits){
+    switch(numSetBits){
+        case 0:
+            return 0;                               // cache is fully associative
+        case 1:
+            return ((address[1]-'0') & 128) >> 7;   // return bit 4 of the address
+        case 2:
+            return ((address[1]-'0') & 192) >> 6;   // return bits 4 and 5
+        case 3:
+            return ((address[1]-'0') & 224) >> 5;   // return bits 4, 5 and 6
+    }
 }
 
 int main(){
-
     return 0;
 }

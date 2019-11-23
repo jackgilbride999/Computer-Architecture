@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 /* 
     Compute the number of hits and misses if the following list of hexadecimal addresses is
     applied to caches with the following organisations.
@@ -12,7 +14,7 @@ char hex_addresses [32][4] =
     "113c", "2204", "0010", "0020", "0004", "0040", "2208", "0008",
     "00a0", "0004", "1104", "0028", "000c", "0084", "000c", "3390",
     "00b0", "1100", "0028", "0064", "0070", "00d0", "0008", "3394"
-}
+};
 /*
     L is the number of lines, N is the number of sets and K is the number of directories
     Assume that the first 4 bits of the address is used as the offset within
@@ -21,7 +23,7 @@ char hex_addresses [32][4] =
     invalid and that a LRU replacement policy is used.
 */
 
-struct cache = {
+struct cache {
     int N;                  // N = number of sets
     int K;                  // K = cache lines per set
 
@@ -33,11 +35,11 @@ struct cache = {
 
 struct set{
     struct cache_line * lines;  // array of cache lines
-}
+};
 
 struct cache_line{
     char ** contents;           //  array of four strings
-}
+};
 
 int getOffset(char * address){
     // return the offset within the cache line determined by the
@@ -61,7 +63,7 @@ int getNumSetBits(char * address, int N){
 
 int getNumTagBits(char * address, int N){
     // return the number of bits which hold the tag number
-    return 16 - 4 - getNumSetBits(N); 
+    return 16 - 4 - getNumSetBits(address, N); 
 }
 
 int getSetNumber(char * address, int numSetBits){
@@ -77,6 +79,28 @@ int getSetNumber(char * address, int numSetBits){
     }
 }
 
+struct cache * initialise_cache(int K){
+    struct cache * new_cache = calloc(sizeof(struct cache), 0);
+    new_cache -> K = K;
+    int N = 128/(16*K);
+    new_cache -> N = N;
+
+    new_cache -> sets = calloc(sizeof(struct set) * N, 0);                                  // initialize an array of sets of size N
+    for(int n = 0; n<N; n++){                                                               // for each set
+        new_cache -> sets[n] -> lines = calloc(sizeof(struct cache_line) * K, 0);               //  initalize an array of lines of size K
+        for(int k=0; k<K; k++){                                                                 //  for each line
+            new_cache -> sets[n] -> lines[k] -> contents = calloc(sizeof(char *) * 4, 0);           // initialize array of four strings
+            for(int i=0; i<4; i++){                                                                 // for each string
+                new_cache -> sets[n] -> lines[k] -> contents[i] = calloc(sizeof(char) * 4, 0);          // initialize string
+            }
+        }
+    }
+
+    new_cache -> num_hits = 0;
+    new_cache -> num_misses = 0;
+}
+
 int main(){
+    initialise_cache(4);
     return 0;
 }

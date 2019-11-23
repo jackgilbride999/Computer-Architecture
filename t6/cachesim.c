@@ -22,11 +22,22 @@ char hex_addresses [32][4] =
 */
 
 struct cache = {
-    int set_count;          // number of sets in the cache
-    int line_count;         // number of lines in the cache
-    int ** tags;            // pointer to an array of arrays of tags
-    char *** addresses;     // pointer to an array of arrays of strings
+    int N;                  // N = number of sets
+    int K;                  // K = cache lines per set
+
+    struct set * sets;
+
+    int num_hits;
+    int num_misses;
 };
+
+struct set{
+    struct cache_line * lines;  // array of cache lines
+}
+
+struct cache_line{
+    char ** contents;           //  array of four strings
+}
 
 int getOffset(char * address){
     // return the offset within the cache line determined by the

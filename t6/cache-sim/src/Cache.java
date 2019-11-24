@@ -32,25 +32,21 @@ public class Cache {
 		}
 	}
 	
-	int getOffset(int address) {
-		return (address & 0xF000) >>> 12;
-	}
-	
 	int getSet(int address) {
-		return (address & 0x0FFF) >>> (12-numSetBits); // something wrong here somewhere
+		switch(this.numSetBits) {
+		case 1:
+			return (address >>> 4) & 0x1;
+		case 2:
+			return (address >>> 4) & 0x3;
+		case 3:
+			return (address >>> 4) & 0x7;
+		default:
+			return 0;
+		}
 	}
 	
 	int getTag(int address) {
-		switch(numSetBits) {
-		case 0:
-			return address & 0x0FFF;
-		case 1:
-			return address & 0x07FF;
-		case 2:
-			return address & 0X03FF;
-		default:
-			return address & 0x01FF;
-		}
+		return address >>> (4 + numSetBits);
 	}
 	
 	/*
@@ -65,10 +61,8 @@ public class Cache {
 	 * a miss.
 	 */
 	boolean accessAddress(int address) {
-		int offset = getOffset(address);
 		int setNumber = getSet(address);
 		int tag = getTag(address);
-	//	System.out.println("Tag = " + tag + ", set = " + setNumber + ", offset = " + offset);
 		if(this.sets[setNumber].contains(tag)) {
 			this.sets[setNumber].remove((Object)tag);
 			this.sets[setNumber].addFirst(tag);

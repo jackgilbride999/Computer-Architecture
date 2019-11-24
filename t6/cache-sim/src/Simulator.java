@@ -9,11 +9,20 @@ public class Simulator {
 			    0x00b0, 0x1100, 0x0028, 0x0064, 0x0070, 0x00d0, 0x0008, 0x3394
 		};
 	
-	static int numHits;
-	static int numMisses;
-	
 	public static void main(String[] args) {
-		numHits = 0;
-		numMisses = 0;
+		int[] Ns = {8, 4, 2, 1};
+		int[] Ks = {1, 2, 4, 8};
+		for(int i=0; i<4; i++) {
+			Cache cache = new Cache(Ns[i], Ks[i], 16);
+			int numHits = 0;
+			int numMisses = 0;
+			for(int a=0; a<addresses.length; a++) {
+				if(cache.accessAddress(addresses[a]))
+					numHits++;
+				else
+					numMisses++;
+			}
+			System.out.println("N = " + Ns[i] + ". K = " + Ks[i] + ". Number hits = " + numHits + ". Number misses = " + numMisses);
+		}
 	}
 }

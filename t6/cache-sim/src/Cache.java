@@ -1,3 +1,4 @@
+import java.util.LinkedList;
 
 public class Cache {
 
@@ -5,16 +6,16 @@ public class Cache {
 	int K;
 	int L;
 	int numSetBits;
-	Set[] sets;
+	LinkedList<Integer>[] sets;
 	
 	Cache(int N, int K, int L) {
 		this.N = N;
 		this.K = K;
 		this.L = L;
 		this.numSetBits = getNumSetBits();
-		this.sets = new Set[N];
+		this.sets = new LinkedList[N];
 		for(int n=0; n<N; n++) {
-			sets[n] = new Set(this.K, this.L);
+			sets[n] = new LinkedList<Integer>();
 		}
 	}
 	
@@ -36,7 +37,7 @@ public class Cache {
 	}
 	
 	int getSet(int address) {
-		return (address & 0x0FFF) >>> (12-numSetBits);
+		return (address & 0x0FFF) >>> (12-numSetBits); // something wrong here somewhere
 	}
 	
 	int getTag(int address) {
@@ -52,8 +53,33 @@ public class Cache {
 		}
 	}
 	
-	int accessAddress(String address) {
-		
-		return 0;
+	/*
+	 * access a specific address and run it through the cache,
+	 * returning whether it is a hit or a miss. 
+	 * In the case of a hit: The relevant set contains the tag,
+	 * so remove it and add it to the start of the list (i.e. 
+	 * set it as the most recently used). Return a hit.
+	 * In the case of a miss: The relevant set does not contain
+	 * the tag. If the set is full, evict the least recently used.
+	 * Either way, add the new tag to the start of the list. Return
+	 * a miss.
+	 */
+	boolean accessAddress(int address) {
+		int offset = getOffset(address);
+		int setNumber = getSet(address);
+		int tag = getTag(address);
+	//	System.out.println("Tag = " + tag + ", set = " + setNumber + ", offset = " + offset);
+		if(this.sets[setNumber].contains(tag)) {
+			this.sets[setNumber].remove((Object)tag);
+			this.sets[setNumber].addFirst(tag);
+			return true;
+		}
+		else {
+			if(this.sets[setNumber].size() == this.K) {
+				this.sets[setNumber].removeLast();
+			}
+			this.sets[setNumber].addFirst(tag);
+			return false;
+		}
 	}
 }

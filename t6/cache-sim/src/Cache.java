@@ -31,26 +31,25 @@ public class Cache {
 		}
 	}
 	
-	int getOffset(String address) {
-		return address.charAt(0)-'0';
+	int getOffset(int address) {
+		return (address & 0xF000) >>> 12;
 	}
 	
-	int getSet(String address) {
-		int toMask = address.charAt(1) - '0';
-		return toMask >>> (8-this.numSetBits);
+	int getSet(int address) {
+		return (address & 0x0FFF) >>> (12-numSetBits);
 	}
 	
-	String getTag(String address) {
-		char mostSignificantBits = address.charAt(1);
-		switch(this.numSetBits) {
+	int getTag(int address) {
+		switch(numSetBits) {
+		case 0:
+			return address & 0x0FFF;
 		case 1:
-			mostSignificantBits = (char) (mostSignificantBits & (128)); break;
+			return address & 0x07FF;
 		case 2:
-			mostSignificantBits = (char) (mostSignificantBits & 192); break;
-		case 3:
-			mostSignificantBits = (char) (mostSignificantBits & 224); break;
+			return address & 0X03FF;
+		default:
+			return address & 0x01FF;
 		}
-		return "" + mostSignificantBits + address.charAt(2) + address.charAt(3);	
 	}
 	
 	int accessAddress(String address) {
